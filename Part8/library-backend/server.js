@@ -18,6 +18,7 @@ const typeDefs = gql`
     id: ID!
     username: String!
     favouriteGenre: String!
+    recommendedBooks: [Book!]!
   }
 
   type Token {
@@ -65,6 +66,13 @@ const typeDefs = gql`
 `
 
 const resolvers = {
+  User: {
+    recommendedBooks: async user => {
+      const { favouriteGenre } = user
+      return Book.find({ genres: { $all: [favouriteGenre] } }).populate('author')
+    },
+  },
+
   Author: {
     bookCount: async author => {
       return Book.find({ author: author.id }).countDocuments()

@@ -9,7 +9,7 @@
   "trailingComma": "es5",
   "bracketSpacing": true,
   "bracketSameLine": false,
-  "htmlWhitespaceSensitivity": "ignore",
+  "htmlWhitespaceSensitivity": "css",
   "arrowParens": "avoid",
   "endOfLine": "lf"
 }

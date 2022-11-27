@@ -1,19 +1,15 @@
 import { useMutation } from '@apollo/client'
 import { useState } from 'react'
-import { ADD_BOOK, ALL_AUTHORS, ALL_BOOKS } from '../queries'
-import { noop } from '../utils'
+import { ADD_BOOK, ALL_AUTHORS, ALL_BOOKS, CURRENT_USER } from '../queries'
 
 const NewBook = ({ show }) => {
-  const [title, setTitle] = useState('')
-  const [author, setAuthor] = useState('')
+  const [title, setTitle] = useState('test')
+  const [author, setAuthor] = useState('test')
   const [published, setPublished] = useState('')
-  const [genre, setGenre] = useState('')
+  const [genre, setGenre] = useState('design')
   const [genres, setGenres] = useState([])
 
-  const [addBook, { loading, error }] = useMutation(ADD_BOOK, {
-    refetchQueries: [{ query: ALL_BOOKS }, { query: ALL_AUTHORS }],
-    onError: noop,
-  })
+  const [addBook, { loading, error }] = useMutation(ADD_BOOK)
 
   if (!show) return null
 
@@ -22,6 +18,46 @@ const NewBook = ({ show }) => {
 
     addBook({
       variables: { title, published: Number(published), genres, author },
+
+      update: (cache, response) => {
+        const book = response.data.addBook
+
+        const booksUpdater = data => {
+          if (!data) return data
+          return { allBooks: [...data.allBooks, book] }
+        }
+
+        ;[...genres, null, undefined].forEach(genre =>
+          cache.updateQuery(
+            {
+              query: ALL_BOOKS,
+              ...(genre !== undefined && { variables: { genre } }),
+            },
+            booksUpdater
+          )
+        )
+
+        cache.updateQuery({ query: ALL_AUTHORS }, data => {
+          if (!data) return data
+
+          const { allAuthors } = data
+          if (allAuthors.some(a => a.name === book.author.name)) return data
+
+          return { allAuthors: [...allAuthors, book.author] }
+        })
+
+        cache.updateQuery({ query: CURRENT_USER }, data => {
+          if (!data || !data.me) return data
+          if (!book.genres.includes(data.me.favouriteGenre)) return data
+
+          const { me } = data
+          const newMe = { ...me, recommendedBooks: [...me.recommendedBooks, book] }
+
+          return { me: newMe }
+        })
+      },
+
+      onError: e => console.error(e),
     })
 
     setTitle('')
@@ -42,10 +78,7 @@ const NewBook = ({ show }) => {
       <form>
         <div>
           title
-          <input
-            value={title}
-            onChange={({ target }) => setTitle(target.value)}
-          />
+          <input value={title} onChange={({ target }) => setTitle(target.value)} />
         </div>
         <div>
           author
@@ -63,10 +96,7 @@ const NewBook = ({ show }) => {
           />
         </div>
         <div>
-          <input
-            value={genre}
-            onChange={({ target }) => setGenre(target.value)}
-          />
+          <input value={genre} onChange={({ target }) => setGenre(target.value)} />
           <button onClick={addGenre} type='button'>
             add genre
           </button>
