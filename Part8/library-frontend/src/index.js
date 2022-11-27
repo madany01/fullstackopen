@@ -1,12 +1,12 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 
-import App from './components/App'
+import Root from './components/Root'
 
 const root = ReactDOM.createRoot(document.getElementById('root'))
 const strict = true
 
-const rootComponent = <App />
+const rootComponent = <Root />
 
 root.render(
   strict ? <React.StrictMode>{rootComponent}</React.StrictMode> : rootComponent
