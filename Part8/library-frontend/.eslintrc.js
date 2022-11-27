@@ -1,0 +1,27 @@
+module.exports = {
+  extends: [
+    'eslint:recommended',
+    'airbnb-base',
+    'react-app',
+    'react-app/jest',
+    'plugin:react/recommended',
+    'plugin:react-hooks/recommended',
+    'plugin:react/jsx-runtime',
+    'plugin:prettier/recommended',
+  ],
+  rules: {
+    'import/prefer-default-export': 'off',
+    'no-restricted-exports': 'off',
+    'no-console': 'off',
+    'no-underscore-dangle': ['off'],
+    'no-return-assign': ['error', 'except-parens'],
+    'no-use-before-define': 'off',
+    // 'no-use-before-define': ['error', { functions: false }],
+    'no-multi-assign': ['error', { ignoreNonDeclaration: true }],
+    'lines-between-class-members': 'off',
+    'no-shadow': 'off',
+    'react/react-in-jsx-scope': 'off',
+    'react/prop-types': 'off',
+    'consistent-return': 'off',
+  },
+}
